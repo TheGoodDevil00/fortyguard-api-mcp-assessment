@@ -26,7 +26,7 @@ jobs:
 
       - name: Run Pytest Test Suite
         run: |
-          pytest -v tests/test_validation_suite.py
+          python -m pytest -v tests/test_validation_suite.py
 
       - name: Run Autonomous Harness Offline Verification
         run: |
