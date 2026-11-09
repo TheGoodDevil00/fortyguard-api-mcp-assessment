@@ -1,4 +1,4 @@
-# FortyGuard Temperature API® & Model Context Protocol (MCP) — Engineering Evaluation Suite
+# FortyGuard Temperature API® & Model Context Protocol (MCP) Evaluation Suite
 
 **Applicant**: Hitesh Patil  
 **Email**: hitesh.200711@gmail.com  
@@ -51,18 +51,6 @@ flowchart TD
 ---
 
 ## Executive Test Summary
-
-| Metric | Result | Notes |
-|---|---|---|
-| **Account Plan Tier** | **Premium** | Valid through Nov 16, 2026 |
-| **Credit Allocation** | 1,000,000 credits | Initial balance |
-| **Credits Consumed** | 95,740 credits | **9.57%** total usage (well below safe budget) |
-| **Remaining Balance** | 904,260 credits | Fair ledger accounting verified (0 credits for rejections) |
-| **Test Pass Rate** | **30 / 30 (100%)** | Full lifecycle validation across 5 phases |
-| **MCP Protocol** | Streamable HTTP (SSE) | Server `FortyGuard v4.0.11`, 11 live tools discovered |
-| **Forensic PDF** | Verified & Downloaded | 774 KB forensic heat report retrieved via S3 pre-signed link |
-
----
 
 ### 1. Authentication Header Divergence
 - **Current State**: REST requires `api-key: <KEY>`, while MCP strictly rejects it and mandates `Authorization: Bearer <KEY>`.
