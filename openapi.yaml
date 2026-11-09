@@ -1,0 +1,832 @@
+openapi: 3.2.0
+info:
+  title: FortyGuard Temperature API® & Model Context Protocol (MCP) Contract
+  version: 4.0.11
+  description: |
+    Production-grade OpenAPI 3.2.0 specification for FortyGuard's urban thermal intelligence ecosystem.
+    Models Large Temperature Model (LTM) REST services, GeoJSON spatial schemas, asynchronous polling,
+    Server-Sent Events (SSE) streaming with `itemSchema`, native `QUERY` method operations, and remote MCP tool bridges.
+  contact:
+    name: FortyGuard Developer Platform
+    url: https://docs-api.fortyguard.com
+  license:
+    name: Proprietary / FortyGuard Platform License
+
+servers:
+  - url: https://api.fortyguard.com/v1
+    description: Primary REST API Gateway
+  - url: https://tos-mcp.app.fortyguard.com/mcp
+    description: Remote MCP Streamable HTTP (SSE) Server
+
+tags:
+  - name: atmospheric
+    summary: Atmospheric Intelligence
+    description: Point-level microclimate calculations, wet bulb, and solar irradiance
+    kind: nav
+  - name: spatial
+    summary: Urban Thermal Heatmaps
+    description: High-resolution GIS temperature distributions and statistical moments
+    kind: nav
+  - name: vision
+    summary: Computer Vision Segmentation
+    description: Overhead satellite land-cover and street-level facade semantic segmentation
+    kind: nav
+  - name: intelligence
+    summary: Multi-Dimensional Reports
+    description: Synthesized heat hazard reports with signed S3 PDF delivery
+    kind: nav
+  - name: routing
+    summary: Thermal Navigation
+    description: Temperature-exposure optimized routing for active and vehicular transit
+    kind: nav
+  - name: monitors
+    summary: Monitoring & Alerting
+    description: Threshold monitoring lifecycles and proactive geospatial alert feeds
+    kind: nav
+  - name: mcp
+    summary: Model Context Protocol
+    description: Remote AI agent tool discovery and execution over Streamable HTTP (SSE)
+    kind: nav
+  - name: account
+    summary: Account & Ledger
+    description: Real-time credit balance accounting and billing period tracking
+    kind: nav
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+
+paths:
+  /env_params:
+    query:
+      summary: Query point environmental metrics (Idempotent Query)
+      description: |
+        OpenAPI 3.2.0 native `QUERY` operation for calculating point-level atmospheric, comfort,
+        and solar irradiance parameters in an idempotent manner with a request body.
+      operationId: queryEnvParams
+      tags: [atmospheric]
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvParamsRequest'
+      responses:
+        '200':
+          description: Completed point environmental parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvParamsResponse'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/schemas/UnauthorizedResponse'
+        '422':
+          $ref: '#/components/schemas/ValidationErrorResponse'
+
+    post:
+      summary: Submit point environmental query (Standard REST)
+      description: Backward-compatible REST endpoint calculating environmental metrics.
+      operationId: submitEnvParams
+      tags: [atmospheric]
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvParamsRequest'
+      responses:
+        '200':
+          description: Completed point environmental parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvParamsResponse'
+        '401':
+          $ref: '#/components/schemas/UnauthorizedResponse'
+
+  /heatmap:
+    post:
+      summary: Submit asynchronous urban heatmap generation
+      description: |
+        Initiates 100m spatial resolution thermal modeling for an Area of Interest (AOI).
+        Requires a valid GeoJSON `FeatureCollection` containing a single `Polygon` feature.
+      operationId: createHeatmap
+      tags: [spatial]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeatmapRequest'
+      responses:
+        '200':
+          description: Task accepted into activity queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncSubmitResponse'
+        '400':
+          description: Invalid polygon geometry or empty FeatureCollection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Bare Polygon supplied instead of FeatureCollection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /satellite:
+    post:
+      summary: Overhead satellite land-cover semantic segmentation
+      description: Analyzes coordinates to extract building, tree canopy, water, and earth coverage percentages.
+      operationId: segmentSatellite
+      tags: [vision]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisionRequest'
+      responses:
+        '200':
+          description: Task queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncSubmitResponse'
+
+  /streetview:
+    post:
+      summary: Street-level urban facade and canopy semantic segmentation
+      description: Computes ground-level urban facade, asphalt, sky, and greenery segmentation masks.
+      operationId: segmentStreetview
+      tags: [vision]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisionRequest'
+      responses:
+        '200':
+          description: Task queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncSubmitResponse'
+
+  /heat_intelligence:
+    post:
+      summary: Synthesize multi-dimensional heat intelligence report (S3 PDF)
+      description: |
+        Generates macro-scale urban thermal synthesis report.
+        **Important Note**: Requires input baseline temperature in **Fahrenheit** (°F).
+      operationId: generateHeatReport
+      tags: [intelligence]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeatIntelRequest'
+      responses:
+        '200':
+          description: Task queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncSubmitResponse'
+
+  /routing:
+    post:
+      summary: Compute temperature-aware routing alternatives
+      description: Calculates driving or pedestrian routes optimized for minimal urban thermal exposure.
+      operationId: planThermalRoute
+      tags: [routing]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingRequest'
+      responses:
+        '200':
+          description: Route calculation task queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncSubmitResponse'
+        '400':
+          description: Origin and destination distance exceeds maximum boundary (200 km)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /status/{activity_id}:
+    get:
+      summary: Query or stream asynchronous task status
+      description: |
+        Polls the execution state of an ongoing compute job or establishes a Server-Sent Events (SSE)
+        stream via OpenAPI 3.2.0 `itemSchema` support.
+      operationId: getTaskStatus
+      tags: [spatial, vision, intelligence, routing]
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      parameters:
+        - name: activity_id
+          in: path
+          required: true
+          description: Unique asynchronous job identifier returned upon task submission
+          schema:
+            type: string
+            format: uuid
+            example: 808b4443-e39e-4b8f-b231-e530c5a0c907
+      responses:
+        '200':
+          description: Status retrieved successfully or streaming progress events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatusResponse'
+            text/event-stream:
+              itemSchema:
+                $ref: '#/components/schemas/TaskProgressEvent'
+        '404':
+          description: Activity ID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /monitors:
+    get:
+      summary: List registered thermal threshold monitors
+      operationId: listMonitors
+      tags: [monitors]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: List of monitors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MonitorObject'
+
+    post:
+      summary: Create proactive threshold monitor
+      description: |
+        Registers an active thermal monitor. Boundary must be enclosed in a GeoJSON `FeatureCollection`.
+      operationId: createMonitor
+      tags: [monitors]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMonitorRequest'
+      responses:
+        '200':
+          description: Monitor registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MonitorObject'
+        '422':
+          description: Boundary geometry not wrapped in FeatureCollection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /monitors/{monitor_id}:
+    get:
+      summary: Inspect monitor configuration
+      operationId: getMonitor
+      tags: [monitors]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: monitor_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Monitor retrieved
+    patch:
+      summary: Update monitor properties
+      operationId: updateMonitor
+      tags: [monitors]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: monitor_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                enabled:
+                  type: boolean
+      responses:
+        '200':
+          description: Monitor updated
+    delete:
+      summary: Delete monitor
+      operationId: deleteMonitor
+      tags: [monitors]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: monitor_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Monitor deleted
+
+  /monitors/{monitor_id}/alerts:
+    get:
+      summary: Query triggered alert history for monitor
+      operationId: listMonitorAlerts
+      tags: [monitors]
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: monitor_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alert events
+
+  /system/fetch-api-key-usage:
+    post:
+      summary: Fetch real-time API credit ledger and subscription state
+      operationId: fetchApiKeyUsage
+      tags: [account]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Credit accounting ledger and billing period
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditUsageResponse'
+
+  /mcp:
+    post:
+      summary: Execute MCP tool invocation (JSON-RPC 2.0)
+      description: Executes one of the 11 discovered tools over Streamable HTTP.
+      operationId: executeMcpTool
+      tags: [mcp]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonRpcRequest'
+      responses:
+        '200':
+          description: JSON-RPC 2.0 result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonRpcResponse'
+    get:
+      summary: Connect persistent MCP Streamable HTTP session
+      description: Establishes a Server-Sent Events (SSE) session for client-server protocol events.
+      operationId: connectMcpStream
+      tags: [mcp]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Active SSE event stream
+          content:
+            text/event-stream:
+              itemSchema:
+                $ref: '#/components/schemas/MCPEvent'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: api-key
+      description: FortyGuard REST custom header authentication
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: RFC 6750 Bearer token authentication required for Model Context Protocol (MCP)
+
+  schemas:
+    GeoJSONFeatureCollection:
+      type: object
+      required: [type, features]
+      properties:
+        type:
+          type: string
+          enum: [FeatureCollection]
+        features:
+          type: array
+          items:
+            type: object
+            required: [type, geometry, properties]
+            properties:
+              type:
+                type: string
+                enum: [Feature]
+              properties:
+                type: object
+              geometry:
+                type: object
+                required: [type, coordinates]
+                properties:
+                  type:
+                    type: string
+                    enum: [Polygon]
+                  coordinates:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        type: array
+                        items:
+                          type: number
+                        minItems: 2
+                        maxItems: 2
+
+    EnvParamsRequest:
+      type: object
+      required: [latitude, longitude, temperature, date_time]
+      properties:
+        latitude:
+          type: number
+          example: 33.4484
+        longitude:
+          type: number
+          example: -112.0740
+        temperature:
+          type: number
+          description: Baseline ambient temperature in Celsius (°C)
+          example: 35.0
+        unit:
+          type: string
+          enum: [celsius, fahrenheit]
+          default: celsius
+        date_time:
+          type: object
+          required: [start_date, start_time, filter_type]
+          properties:
+            start_date:
+              type: string
+              format: date
+              example: '2024-07-15'
+            start_time:
+              type: string
+              example: '14:00'
+            filter_type:
+              type: integer
+              example: 1
+        analysis:
+          type: array
+          description: Optional parameter subset filter
+          items:
+            type: string
+            enum:
+              - apparent_temperature_celsius
+              - wet_bulb_temperature_celsius
+              - heat_index_celsius
+              - relative_humidity_percent
+              - air_quality:idx
+              - air_quality_pm2p5:idx
+              - ghi
+              - dni
+              - dhi
+
+    EnvParamsResponse:
+      type: object
+      properties:
+        activity_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: Completed
+        result:
+          type: object
+          properties:
+            locations:
+              type: array
+              items:
+                type: object
+                properties:
+                  lat:
+                    type: number
+                  lon:
+                    type: number
+                  parameters:
+                    type: object
+                    properties:
+                      apparent_temperature_celsius:
+                        type: array
+                        items: {type: number}
+                      relative_humidity_percent:
+                        type: array
+                        items: {type: number}
+                      wet_bulb_temperature_celsius:
+                        type: array
+                        items: {type: number}
+
+    HeatmapRequest:
+      type: object
+      required: [polygon_aoi, date_time, temperature]
+      properties:
+        polygon_aoi:
+          $ref: '#/components/schemas/GeoJSONFeatureCollection'
+        temperature:
+          type: number
+          description: Temperature in Celsius (°C)
+          example: 35.0
+        resolution:
+          type: integer
+          default: 100
+        date_time:
+          type: object
+          required: [start_date, start_time, filter_type]
+          properties:
+            start_date:
+              type: string
+              example: '2024-07-15'
+            start_time:
+              type: string
+              example: '14:00'
+            filter_type:
+              type: integer
+              example: 1
+
+    VisionRequest:
+      type: object
+      required: [coordinates]
+      properties:
+        coordinates:
+          type: object
+          required: [latitude, longitude]
+          properties:
+            latitude:
+              type: number
+              example: 41.8781
+            longitude:
+              type: number
+              example: -87.6298
+
+    HeatIntelRequest:
+      type: object
+      required: [polygon_aoi, date_time, temperature]
+      properties:
+        polygon_aoi:
+          $ref: '#/components/schemas/GeoJSONFeatureCollection'
+        temperature:
+          type: number
+          description: Baseline ambient temperature in Fahrenheit (°F)
+          example: 95.0
+        date_time:
+          type: object
+          properties:
+            start_date:
+              type: string
+              example: '2024-07-15'
+            start_time:
+              type: string
+              example: '14:00'
+
+    RoutingRequest:
+      type: object
+      required: [origin, destination]
+      properties:
+        origin:
+          type: object
+          required: [latitude, longitude]
+          properties:
+            latitude: {type: number, example: 33.4484}
+            longitude: {type: number, example: -112.0740}
+        destination:
+          type: object
+          required: [latitude, longitude]
+          properties:
+            latitude: {type: number, example: 33.4255}
+            longitude: {type: number, example: -111.9400}
+        mode:
+          type: string
+          enum: [driving, walking, cycling]
+          default: driving
+
+    CreateMonitorRequest:
+      type: object
+      required: [name, boundary_geojson, rules]
+      properties:
+        name:
+          type: string
+          example: Downtown Heat Resilience Monitor
+        boundary_geojson:
+          $ref: '#/components/schemas/GeoJSONFeatureCollection'
+        rules:
+          type: array
+          items:
+            type: object
+            properties:
+              threshold: {type: number, example: 38.0}
+              operator: {type: string, enum: [above, below]}
+              unit: {type: string, enum: [celsius, fahrenheit]}
+        enabled:
+          type: boolean
+          default: true
+
+    MonitorObject:
+      type: object
+      properties:
+        monitor_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        enabled:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    AsyncSubmitResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            activity_id:
+              type: string
+              format: uuid
+              example: 808b4443-e39e-4b8f-b231-e530c5a0c907
+            status:
+              type: string
+              example: Queued
+
+    TaskStatusResponse:
+      type: object
+      properties:
+        activity_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [Queued, Processing, Completed, Failed]
+        result:
+          type: object
+        error:
+          type: string
+
+    TaskProgressEvent:
+      type: object
+      description: OpenAPI 3.2.0 itemSchema defining individual Server-Sent Event payloads
+      properties:
+        activity_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [queued, computing_ltm, rendering_raster, completed, failed]
+        progress_percentage:
+          type: number
+          example: 65.5
+        timestamp:
+          type: string
+          format: date-time
+
+    CreditUsageResponse:
+      type: object
+      properties:
+        subscription_id:
+          type: string
+        plan_details:
+          type: object
+          properties:
+            plan_type: {type: string, example: Premium}
+            active: {type: boolean, example: true}
+            credits_reset_date: {type: string}
+        credit_summary:
+          type: object
+          properties:
+            total_available_credits: {type: integer, example: 1000000}
+            total_credits_used: {type: integer, example: 95740}
+            total_remaining_credits: {type: integer, example: 904260}
+
+    JsonRpcRequest:
+      type: object
+      required: [jsonrpc, method, params, id]
+      properties:
+        jsonrpc: {type: string, enum: ['2.0']}
+        method: {type: string, example: tools/call}
+        params:
+          type: object
+          required: [name, arguments]
+          properties:
+            name: {type: string, example: credit_balance}
+            arguments: {type: object}
+        id: {type: integer, example: 1}
+
+    JsonRpcResponse:
+      type: object
+      required: [jsonrpc, id]
+      properties:
+        jsonrpc: {type: string, enum: ['2.0']}
+        id: {type: integer}
+        result: {type: object}
+        error: {type: object}
+
+    MCPEvent:
+      type: object
+      description: Streamable HTTP SSE session event
+      properties:
+        event: {type: string, example: message}
+        data: {$ref: '#/components/schemas/JsonRpcResponse'}
+
+    ErrorResponse:
+      type: object
+      properties:
+        error: {type: boolean, example: true}
+        status_code: {type: integer, example: 400}
+        message: {type: string, example: Provide exactly one valid Polygon feature.}
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error: {type: boolean, example: true}
+        status_code: {type: integer, example: 422}
+        message: {type: string, example: boundary_geojson must be a GeoJSON FeatureCollection.}
+        field: {type: string, example: boundary_geojson}
+
+    UnauthorizedResponse:
+      type: object
+      properties:
+        status: {type: integer, example: 401}
+        message: {type: string, example: Unauthorized}
