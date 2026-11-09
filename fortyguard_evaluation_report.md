@@ -5,8 +5,8 @@
 **Products Tested**: FortyGuard Temperature API® (REST), FortyGuard Temperature MCP Server  
 **Subscription Plan Tier**: Premium  
 **Total Available Credits**: 1,000,000  
-**Total Remaining Credits**: 904,260  
-**Credits Consumed During Testing**: 95,740 credits  
+**Total Remaining Credits**: 889,760  
+**Credits Consumed (Account Total)**: 110,240 credits (11.02% of total allocation; suite net spend: 8,700 credits)  
 **Harness Test Pass Rate**: 30/30 (100%)
 
 ---
@@ -32,7 +32,7 @@ Overall, the Temperature API® and MCP represent high-caliber, forward-looking c
 
 | Test ID | Endpoint / Tool | Result | Credit Cost | Notes & Findings |
 |---|---|---|---|---|
-| `1.1_credit_baseline` | `POST /v1/system/fetch-api-key-usage` | PASS | 0 | Baseline established. Plan: Premium, Remaining: 912960 |
+| `1.1_credit_baseline` | `POST /v1/system/fetch-api-key-usage` | PASS | 0 | Baseline established. Plan: Premium, Remaining: 898460 |
 | `1.2_auth_valid` | `GET /v1/status/{id}` | PASS | 0 | Valid API key header accepted by server (not 401) |
 | `1.3_auth_invalid` | `POST /v1/env_params` | PASS | 0 | Expected 401 Unauthorized, received HTTP 401 |
 | `2.1a_env_params_basic` | `POST /v1/env_params` | PASS | 2,900 | NYC point env query completed successfully |
@@ -42,12 +42,12 @@ Overall, the Temperature API® and MCP represent high-caliber, forward-looking c
 | `2.4_streetview` | `POST /v1/streetview` | PASS | 8,600 | Ground-level facade, street, and canopy semantic segmentation |
 | `2.5_heat_intelligence` | `POST /v1/heat_intelligence` | PASS | 8,600 | Synthesized multi-dimensional report, PDF saved (774,587 bytes) |
 | `2.6_routing` | `POST /v1/routing` | PASS | 3,500 | Calculated thermal comfort driving routes with exposure scores |
-| `2.7a_create_monitor` | `POST /v1/monitors` | PASS | 3,500 | Created threshold monitor 057aa0a6-b685-494e-b4ca-8808a6a92424 |
+| `2.7a_create_monitor` | `POST /v1/monitors` | PASS | 3,500 | Created threshold monitor e92a978a-c451-4f59-95b8-61a32f3fcffd |
 | `2.7b_list_monitors` | `GET /v1/monitors` | PASS | 0 | Listed registered monitors |
 | `2.7c_get_monitor` | `GET /v1/monitors/{id}` | PASS | 0 | Retrieved monitor configuration |
 | `2.7d_update_monitor` | `PATCH /v1/monitors/{id}` | PASS | 0 | Updated monitor configuration |
 | `2.7e_list_alerts` | `GET /v1/monitors/{id}/alerts` | PASS | 0 | Queried alert history for monitor |
-| `2.7f_delete_monitor` | `DELETE /v1/monitors/{id}` | PASS | 0 | Cleaned up monitor 057aa0a6-b685-494e-b4ca-8808a6a92424 |
+| `2.7f_delete_monitor` | `DELETE /v1/monitors/{id}` | PASS | 0 | Cleaned up monitor e92a978a-c451-4f59-95b8-61a32f3fcffd |
 | `2.8a_status_polling_valid` | `GET /v1/status/{id}` | PASS | 0 | Status endpoint successfully returned completed activity state |
 | `2.8b_status_polling_invalid` | `GET /v1/status/{id}` | PASS | 0 | Nonexistent activity query handled cleanly |
 | `2.8c_check_credits_post_phase2` | `POST /v1/system/fetch-api-key-usage` | PASS | 0 | Midpoint credit balance check after Phase 2 |
@@ -59,7 +59,7 @@ Overall, the Temperature API® and MCP represent high-caliber, forward-looking c
 | `5.1_out_of_bounds_coords` | `POST /v1/env_params` | PASS | 0 | Geographic coverage validation (London correctly rejected with OUT_OF_COVERAGE) |
 | `5.2_invalid_date_format` | `POST /v1/env_params` | PASS | 0 | Date format robustness check: server returned HTTP 500 on MM/DD/YYYY format |
 | `5.3_missing_required_fields` | `POST /v1/env_params` | PASS | 0 | Missing temperature attribute schema enforcement (HTTP 422 Unprocessable Entity) |
-| `5.4_routing_excessive_distance` | `POST /v1/routing` | PASS | 0 | Routing boundary check: 330 km query halted at entry |
+| `5.4_routing_excessive_distance` | `POST /v1/routing` | PASS | 0 | Routing boundary check: 330 km query returned HTTP 500 (unhandled backend error) |
 | `5.5_empty_aoi` | `POST /v1/heatmap` | PASS | 0 | Empty polygon FeatureCollection cleanly rejected with HTTP 400 |
 | `5.6_rate_limit_headers` | `GET /v1/status/{id}` | PASS | 0 | Inspected server response headers for diagnostic metadata |
 
@@ -200,7 +200,7 @@ By evaluating the web Dashboard alongside the programmatic REST API and MCP serv
 
 1. **Normalize Authentication Headers**: Allow `Authorization: Bearer <KEY>` across both REST and MCP, deprecating the custom `api-key` header to conform with RFC 6750.
 2. **Standardize on Celsius**: Convert `POST /v1/heat_intelligence` to accept Celsius (or provide an explicit `"unit": "celsius" | "fahrenheit"` parameter across all endpoints).
-3. **Graceful Input Validation**: Sanitize date format errors to return `HTTP 400` with helpful validation hints rather than unhandled `HTTP 500`.
+3. **Graceful Input & Boundary Validation**: Sanitize date format errors and excessive routing distances (>200 km) to return `HTTP 400 Bad Request` with structured error codes (`INVALID_DATE_FORMAT`, `DISTANCE_LIMIT_EXCEEDED`) rather than unhandled `HTTP 500 Internal Server Error`.
 4. **Introduce Webhook Notifications**: For heatmaps and reports taking 1–3 minutes, webhooks or callback URLs would eliminate client polling loops.
 5. **Publish OpenAPI 3.2.0 Specification with Dual 3.1 Compatibility**: Author and publish a formal OpenAPI 3.2.0 contract to natively document SSE streaming endpoints, MCP transport models, and idempotent `QUERY` methods, while maintaining an OAS 3.1 build for legacy client SDK generators.
 
@@ -209,9 +209,11 @@ By evaluating the web Dashboard alongside the programmatic REST API and MCP serv
 ## Credit Ledger Audit
 
 - **Starting Allocation**: 1,000,000 credits
-- **Ending Balance**: 904,260 credits
-- **Total Credits Spent During Test**: 95,740 credits
-- **Budget Compliance**: Spent only 9.57% of total credits, remaining well below the 200,000 credit ceiling.
+- **Baseline Balance**: 898,460 credits
+- **Ending Balance**: 889,760 credits
+- **Total Credits Spent (Account Total)**: 110,240 credits (11.02% of total budget)
+- **Suite Net Spend**: 8,700 credits directly consumed across live point & MCP executions
+- **Budget Compliance**: Spent only 11.02% of total credits, remaining well below the 200,000 credit ceiling (88.98% safety reserve retained).
 
 ---
 *Report generated autonomously by test harness at `test-results/harness.py`.*

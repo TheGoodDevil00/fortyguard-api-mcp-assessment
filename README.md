@@ -69,8 +69,8 @@ flowchart TD
 - **Finding**: The additions are excellent for agentic use (allowing agents to check budget before calling expensive LTM tools). Public documentation should be updated to reflect these 2 additions.
 
 ### 5. Input Validation Error Boundaries
-- **Current State**: Submitting non-ISO date formats (`07/15/2024`) returns an unhandled `HTTP 500 Internal Server Error`.
-- **Proposed Solution**: Catch date parsing errors at the request schema validation layer (Pydantic / Joi) and return `HTTP 400 Bad Request` with an informative error message: `"Invalid date format. Expected YYYY-MM-DD or ISO 8601 string."`
+- **Current State**: Submitting non-ISO date formats (`07/15/2024`) or excessive routing distances (>200 km) triggers unhandled `HTTP 500 Internal Server Error` responses on FortyGuard's backend.
+- **Proposed Solution**: Catch date parsing errors and routing distance limits at the request schema validation layer (Pydantic / Joi) and return structured `HTTP 400 Bad Request` envelopes with descriptive error codes (`INVALID_DATE_FORMAT`, `DISTANCE_LIMIT_EXCEEDED`).
 
 ### 6. OpenAPI 3.2.0 Specification Adoption
 - **Current State**: API documentation is currently static Markdown without a machine-readable schema.
@@ -138,7 +138,7 @@ pip install -r requirements.txt
 ### 2. Instant Offline Verification (No Credentials or Credits Needed)
 Reviewers can immediately verify the integrity of all 30 test executions, schemas, and contract assertions offline:
 ```bash
-# Run via pytest (22 test suites, 0.05s execution):
+# Run via pytest (25 test functions, ~0.1s execution):
 python -m pytest -v tests/test_validation_suite.py
 
 # Or run via harness offline verification mode:
@@ -147,6 +147,9 @@ python test-results/harness.py --verify
 
 ### 3. Live Execution (Against FortyGuard Endpoints)
 To run live end-to-end tests against FortyGuard production APIs and the MCP server:
+> [!NOTE]
+> Point atmospheric queries, monitor CRUD lifecycles, and remote MCP tool calls execute live against FortyGuard endpoints. Long-running compute-heavy tasks (heatmaps, satellite segmentation, PDF reports) poll verified asynchronous activity IDs to safeguard API credits while asserting production status contract schemas.
+
 ```bash
 # Option A: Set environment variable
 export FORTYGUARD_API_KEY="your_api_key_here"
