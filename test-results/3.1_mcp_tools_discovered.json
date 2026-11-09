@@ -1,0 +1,1316 @@
+[
+  {
+    "name": "credit_balance",
+    "description": "Read your available Enterprise API credits; free and read-only.",
+    "input_schema": {
+      "properties": {},
+      "type": "object",
+      "additionalProperties": false,
+      "title": "CreditBalanceInput"
+    }
+  },
+  {
+    "name": "env_params",
+    "description": "Point-level environmental conditions for a single coordinate and date — e.g. provider-sourced apparent temperature, wet-bulb temperature, humidity, precipitation, and AQI, plus modeled clear-sky solar irradiance estimates (GHI, DNI, and DHI in W/m²). Provide the location's temperature in Celsius, supplied by the user or obtained from a reliable source. If it is unavailable, ask the user; never invent, assume, or silently substitute a temperature. heat_index_celsius is derived from this temperature and provider-sourced relative humidity. Use for a single location's numeric values, not area-wide maps or written reports. Historical temperature requests start at 2021-01-01; provider availability varies by location, date, and parameter. Future dates are unsupported. Paid: 2,110 credits on basic/startup, 2,900 on premium/hackathon. Show the user the exact parameters and expected credit cost, and ask for confirmation before execution. FortyGuard currently provides data only for supported regions within the United States. Requests outside supported U.S. coverage are not allowed. Availability within the United States also depends on the tool, location, date, and underlying data coverage.",
+    "input_schema": {
+      "properties": {
+        "heatmap_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Existing Dashboard heatmap reference",
+          "title": "Heatmap Id"
+        },
+        "latitude": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Longitude",
+          "type": "number"
+        },
+        "temperature": {
+          "description": "Caller-supplied reference temperature in degrees Celsius. Used with provider-sourced relative humidity to calculate heat_index_celsius.",
+          "title": "Temperature",
+          "type": "number"
+        },
+        "date_time": {
+          "properties": {
+            "start_date": {
+              "description": "Start date in YYYY-MM-DD format",
+              "title": "Start Date",
+              "type": "string"
+            },
+            "end_date": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "End date in YYYY-MM-DD format",
+              "title": "End Date"
+            },
+            "start_time": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Start time in HH:MM 24h format, local to the requested coordinates; the timezone is inferred.",
+              "title": "Start Time"
+            },
+            "end_time": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "End time in HH:MM 24h format, local to the requested coordinates; the timezone is inferred.",
+              "title": "End Time"
+            },
+            "filter_type": {
+              "description": "1=single hour, 2=range of hours, 3=single day, 4=range of days (week/month, <=1 month)",
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "title": "Filter Type",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "start_date",
+            "filter_type"
+          ],
+          "title": "SegmentationDateTimeRange",
+          "type": "object"
+        },
+        "analysis": {
+          "anyOf": [
+            {
+              "items": {
+                "description": "Environmental measurements available for selection.",
+                "enum": [
+                  "heat_index_celsius",
+                  "apparent_temperature_celsius",
+                  "wet_bulb_temperature_celsius",
+                  "relative_humidity_percent",
+                  "precipitation_mm",
+                  "cloud_cover_octas",
+                  "elevation_meters",
+                  "aqi_us",
+                  "aqi_us_pm25",
+                  "aqi_us_pm10",
+                  "aqi_us_no2",
+                  "aqi_us_co",
+                  "aqi_us_o3",
+                  "aqi_us_so2",
+                  "methane_ppb",
+                  "co2_ppm",
+                  "solar_irradiance"
+                ],
+                "title": "AnalysisField",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Output fields to return; omitted uses the default set. Temperature fields are °C; humidity %, precipitation mm, cloud cover octas (0-8), elevation m, AQI fields US AQI index, methane ppb, CO2 ppm, and solar_irradiance clear-sky GHI/DNI/DHI in W/m².",
+          "title": "Analysis"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude",
+        "temperature",
+        "date_time"
+      ],
+      "type": "object",
+      "title": "EnvParamsInput"
+    }
+  },
+  {
+    "name": "heatmap",
+    "description": "Submit a standalone temperature or analytic heatmap for a polygon and local date window. start_time and end_time are HH:MM local wall times at the polygon AOI, not UTC; ambiguous or nonexistent DST times are rejected. A heatmap request can cover at most 31 calendar dates, counting both the start and end dates. For longer ranges, explain the limit and request approval before each separate paid submission. Exceedance counts sampled hours; persistence counts continuous sampled hours; thresholds are Celsius with strict above/below comparisons. Time of measure returns the maximum sample's UTC hour, using the earliest timestamp on ties. Returns status=processing and an activity_id immediately; use heatmap_read to retrieve the activity's processing, completed, or failed result. Historical temperature requests start at 2021-01-01; catalog availability varies by location and date. Paid: 3,500 credits on free/basic/startup, 4,220 on premium/hackathon. Show the user the exact parameters and expected credit cost, and ask for confirmation before submission. FortyGuard currently provides data only for supported regions within the United States. Requests outside supported U.S. coverage are not allowed. Availability within the United States also depends on the tool, location, date, and underlying data coverage.",
+    "input_schema": {
+      "properties": {
+        "polygon_aoi": {
+          "additionalProperties": true,
+          "description": "Closed GeoJSON Polygon, Feature or FeatureCollection; longitude then latitude",
+          "title": "Polygon Aoi",
+          "type": "object"
+        },
+        "date_time": {
+          "properties": {
+            "start_date": {
+              "description": "YYYY-MM-DD (historical temperature minimum 2021-01-01; catalog data is not guaranteed)",
+              "title": "Start Date",
+              "type": "string"
+            },
+            "end_date": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "YYYY-MM-DD (required for filter_type 4)",
+              "title": "End Date"
+            },
+            "start_time": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "HH:MM 24h local wall time at the polygon AOI, not UTC (filter_type 1/2). Ambiguous or nonexistent DST times are rejected.",
+              "title": "Start Time"
+            },
+            "end_time": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "HH:MM 24h local wall time at the polygon AOI, not UTC (filter_type 2). Ambiguous or nonexistent DST times are rejected.",
+              "title": "End Time"
+            },
+            "filter_type": {
+              "description": "1=one local hour; 2=same-day local hours (end exclusive for hour-aligned inputs); 3=one local day; 4=inclusive local date range, at most 31 calendar dates",
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "title": "Filter Type",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "start_date",
+            "filter_type"
+          ],
+          "title": "EnterpriseDateTimeRange",
+          "type": "object"
+        },
+        "granularity": {
+          "default": 100,
+          "description": "Heatmap output grid size in meters: 60, 80, or 100 (default 100). Smaller cells produce a finer map.",
+          "enum": [
+            60,
+            80,
+            100
+          ],
+          "title": "Granularity",
+          "type": "integer"
+        },
+        "analytic_type": {
+          "default": "tcm",
+          "description": "tcm=temperature map (default); time_of_measure=peak temperature hour; exceedance=hours beyond threshold; persistence=continuous hours beyond threshold",
+          "enum": [
+            "tcm",
+            "time_of_measure",
+            "exceedance",
+            "persistence"
+          ],
+          "title": "Analytic Type",
+          "type": "string"
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Celsius; defaults to 30 for exceedance/persistence",
+          "title": "Threshold"
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "enum": [
+                "above",
+                "below"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direction"
+        },
+        "idempotency_key": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Idempotency Key"
+        },
+        "map_type": {
+          "default": "bm",
+          "description": "Legacy Dashboard presentation code; accepted for compatibility but ignored by Enterprise/MCP heatmap execution. Use analytic_type to choose the analysis.",
+          "enum": [
+            "bm",
+            "tcm",
+            "tccm"
+          ],
+          "title": "Map Type",
+          "type": "string"
+        },
+        "notify_by_email": {
+          "default": false,
+          "title": "Notify By Email",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "polygon_aoi",
+        "date_time"
+      ],
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Inputs for generating a standalone temperature or analytic heatmap.",
+      "title": "EnterpriseHeatmapInput"
+    }
+  },
+  {
+    "name": "heatmap_read",
+    "description": "Read bounded persisted statistics from an existing temperature or analytic heatmap. Use for grounded questions about a heatmap already shown in Dashboard; does not create or modify a heatmap.",
+    "input_schema": {
+      "properties": {
+        "activity_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "^\\S+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Activity ID returned by heatmap; provide this or heatmap_id",
+          "title": "Activity Id"
+        },
+        "heatmap_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "^\\S+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Compatibility alias for activity_id",
+          "title": "Heatmap Id"
+        }
+      },
+      "type": "object",
+      "title": "EnterpriseHeatmapReadInput"
+    }
+  },
+  {
+    "name": "monitoring",
+    "description": "Recurring temperature monitors of a heatmap: list, read, create, update, delete or run one now; read its latest run, its alerts and their reports. list_monitors and list_alerts are free. All other operations cost 3,500 credits on premium. For a paid operation, show the user the exact parameters and expected credit cost, and ask for confirmation before execution. FortyGuard currently provides data only for supported regions within the United States. Requests outside supported U.S. coverage are not allowed. Availability within the United States also depends on the tool, location, date, and underlying data coverage.",
+    "input_schema": {
+      "properties": {
+        "operation": {
+          "enum": [
+            "create_monitor",
+            "get_monitor",
+            "list_monitors",
+            "update_monitor",
+            "delete_monitor",
+            "get_latest_run",
+            "trigger_forecast",
+            "list_alerts",
+            "get_alert",
+            "get_alert_report",
+            "download_alert_report",
+            "list_runs",
+            "get_run",
+            "delete_heatmap_data"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "monitor_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Monitor Id"
+        },
+        "alert_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Alert Id"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        },
+        "heatmap_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Heatmap Id"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "boundary_geojson": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Boundary Geojson"
+        },
+        "rules": {
+          "anyOf": [
+            {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "temporal_aggregation": {
+                    "enum": [
+                      "minimum",
+                      "average",
+                      "maximum"
+                    ],
+                    "title": "Temporal Aggregation",
+                    "type": "string"
+                  },
+                  "spatial_aggregation": {
+                    "enum": [
+                      "minimum",
+                      "maximum"
+                    ],
+                    "title": "Spatial Aggregation",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "enum": [
+                      "above",
+                      "below",
+                      "within_interval"
+                    ],
+                    "title": "Operator",
+                    "type": "string"
+                  },
+                  "unit": {
+                    "enum": [
+                      "celsius",
+                      "fahrenheit"
+                    ],
+                    "title": "Unit",
+                    "type": "string"
+                  },
+                  "threshold": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Threshold"
+                  },
+                  "lower_bound": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Lower Bound"
+                  },
+                  "upper_bound": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Upper Bound"
+                  }
+                },
+                "required": [
+                  "temporal_aggregation",
+                  "spatial_aggregation",
+                  "operator",
+                  "unit"
+                ],
+                "title": "MonitorRuleInput",
+                "type": "object"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rules"
+        },
+        "notifications": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "email": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 20,
+                  "title": "Email",
+                  "type": "array"
+                },
+                "sms": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 20,
+                  "title": "Sms",
+                  "type": "array"
+                },
+                "whatsapp": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 20,
+                  "title": "Whatsapp",
+                  "type": "array"
+                }
+              },
+              "title": "MonitorNotifications",
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required for create_monitor: include at least one email, sms, or whatsapp destination."
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enabled"
+        },
+        "generate_report": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Generate Report"
+        },
+        "file_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "pdf",
+                "docx"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File Type"
+        },
+        "cursor": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cursor"
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Limit"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        }
+      },
+      "required": [
+        "operation"
+      ],
+      "type": "object",
+      "additionalProperties": false,
+      "title": "MonitoringInput"
+    }
+  },
+  {
+    "name": "report",
+    "description": "Submit a heat-intelligence report for a point and date. Provide the point temperature in degrees Fahrenheit (°F). Returns status=processing and an activity_id immediately; use report_read to retrieve the activity's processing, completed, or failed result. Premium permits at most 2 analysis types per report; select 1 or 2. Historical temperature requests start at 2021-01-01; historical weather and other source availability varies by location and date. Reports can take several minutes; poll report_read with the returned activity_id. Paid: 6,300 credits on free, 8,600 on premium. Show the user the exact parameters and expected credit cost, and ask for confirmation before submission. FortyGuard currently provides data only for supported regions within the United States. Requests outside supported U.S. coverage are not allowed. Availability within the United States also depends on the tool, location, date, and underlying data coverage.",
+    "input_schema": {
+      "properties": {
+        "heatmap_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Existing Dashboard heatmap reference",
+          "title": "Heatmap Id"
+        },
+        "polygon": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dashboard report area polygon",
+          "title": "Polygon"
+        },
+        "report_polygon": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Explicit enriched Dashboard tile polygon",
+          "title": "Report Polygon"
+        },
+        "selected_heat_intelligence_tile_id": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected Heat Intelligence Tile Id"
+        },
+        "date_time": {
+          "anyOf": [
+            {
+              "properties": {
+                "start_date": {
+                  "description": "Start date in YYYY-MM-DD format",
+                  "title": "Start Date",
+                  "type": "string"
+                },
+                "end_date": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "End date in YYYY-MM-DD format",
+                  "title": "End Date"
+                },
+                "start_time": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Start time in HH:MM 24h format, local to the requested coordinates; the timezone is inferred.",
+                  "title": "Start Time"
+                },
+                "end_time": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "End time in HH:MM 24h format, local to the requested coordinates; the timezone is inferred.",
+                  "title": "End Time"
+                },
+                "filter_type": {
+                  "description": "1=single hour, 2=range of hours, 3=single day, 4=range of days (week/month, <=1 month)",
+                  "enum": [
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "title": "Filter Type",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "start_date",
+                "filter_type"
+              ],
+              "title": "SegmentationDateTimeRange",
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "granularity": {
+          "default": 100,
+          "title": "Granularity",
+          "type": "integer"
+        },
+        "notify_by_email": {
+          "default": false,
+          "title": "Notify By Email",
+          "type": "boolean"
+        },
+        "latitude": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Longitude",
+          "type": "number"
+        },
+        "temperature": {
+          "description": "Point temperature in degrees Fahrenheit (°F)",
+          "title": "Temperature",
+          "type": "number"
+        },
+        "date": {
+          "description": "YYYY-MM-DD, past or present only",
+          "title": "Date",
+          "type": "string"
+        },
+        "analysis": {
+          "description": "1-5 of: geographic, environmental, urban, events, anthropogenic. Enterprise Premium allows at most 2 per report.",
+          "items": {
+            "enum": [
+              "geographic",
+              "environmental",
+              "urban",
+              "events",
+              "anthropogenic"
+            ],
+            "title": "ReportAnalysis",
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Analysis",
+          "type": "array"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude",
+        "temperature",
+        "date",
+        "analysis"
+      ],
+      "type": "object",
+      "title": "ReportInput"
+    }
+  },
+  {
+    "name": "report_read",
+    "description": "Read an existing completed Heat Intelligence report without generating a new report.",
+    "input_schema": {
+      "properties": {
+        "heatmap_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Dashboard heatmap context; required only for Dashboard reads.",
+          "title": "Heatmap Id"
+        },
+        "analytics_id": {
+          "description": "Report activity identifier returned by report; activity_id is an accepted input alias.",
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Analytics Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "analytics_id"
+      ],
+      "type": "object",
+      "additionalProperties": false,
+      "title": "EnterpriseReportReadInput"
+    }
+  },
+  {
+    "name": "satellite",
+    "description": "Segment a satellite image for a point into land-cover classes. Use for overhead imagery; use streetview for ground-level imagery. Shared accepts request dates from 2019-01-01; Enterprise's configured minimum may differ, and imagery availability varies by location and capture date. MCP results omit embedded images; segmentation classes, legend, dates, and metadata remain available. Paid: 14,400 credits on premium. Show the user the exact parameters and expected credit cost, and ask for confirmation before execution. FortyGuard currently provides data only for supported regions within the United States. Requests outside supported U.S. coverage are not allowed. Availability within the United States also depends on the tool, location, date, and underlying data coverage.",
+    "input_schema": {
+      "properties": {
+        "heatmap_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Existing Dashboard heatmap reference",
+          "title": "Heatmap Id"
+        },
+        "tiles": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Selected tile or polygon for Dashboard segmentation",
+          "title": "Tiles"
+        },
+        "big_area": {
+          "default": false,
+          "description": "Dashboard polygon mode only; Enterprise/MCP point requests ignore this flag. Default false.",
+          "title": "Big Area",
+          "type": "boolean"
+        },
+        "sat": {
+          "anyOf": [
+            {
+              "properties": {
+                "latitude": {
+                  "description": "Latitude in decimal degrees (-90 to 90)",
+                  "maximum": 90,
+                  "minimum": -90,
+                  "title": "Latitude",
+                  "type": "number"
+                },
+                "longitude": {
+                  "description": "Longitude in decimal degrees (-180 to 180)",
+                  "maximum": 180,
+                  "minimum": -180,
+                  "title": "Longitude",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "latitude",
+                "longitude"
+              ],
+              "title": "SatellitePointInput",
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "date_time": {
+          "properties": {
+            "start_date": {
+              "description": "Start date in YYYY-MM-DD format",
+              "title": "Start Date",
+              "type": "string"
+            },
+            "end_date": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "End date in YYYY-MM-DD format",
+              "title": "End Date"
+            },
+            "start_time": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Start time in HH:MM 24h format, local to the requested coordinates; the timezone is inferred.",
+              "title": "Start Time"
+            },
+            "end_time": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "End time in HH:MM 24h format, local to the requested coordinates; the timezone is inferred.",
+              "title": "End Time"
+            },
+            "filter_type": {
+              "description": "1=single hour, 2=range of hours, 3=single day, 4=range of days (week/month, <=1 month)",
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "title": "Filter Type",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "start_date",
+            "filter_type"
+          ],
+          "title": "SegmentationDateTimeRange",
+          "type": "object"
+        },
+        "granularity": {
+          "default": 100,
+          "description": "Point imagery buffer radius in meters: 60, 80, or 100 (default 100).",
+          "enum": [
+            60,
+            80,
+            100
+          ],
+          "title": "Granularity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "date_time"
+      ],
+      "type": "object",
+      "title": "SatelliteSegmentationInput"
+    }
+  },
+  {
+    "name": "streetview",
+    "description": "Segment street-view imagery for a point into visible urban classes. Use for ground-level front/back views; use satellite for overhead imagery. Street View availability and image capture dates vary by location; a supplied date is not an imagery guarantee. MCP results omit embedded images; segmentation classes, legend, dates, and metadata remain available. Paid: 8,600 credits on premium/hackathon. Show the user the exact parameters and expected credit cost, and ask for confirmation before execution. FortyGuard currently provides data only for supported regions within the United States. Requests outside supported U.S. coverage are not allowed. Availability within the United States also depends on the tool, location, date, and underlying data coverage.",
+    "input_schema": {
+      "properties": {
+        "heatmap_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Existing Dashboard heatmap reference",
+          "title": "Heatmap Id"
+        },
+        "date_time": {
+          "anyOf": [
+            {
+              "properties": {
+                "start_date": {
+                  "description": "Start date in YYYY-MM-DD format",
+                  "title": "Start Date",
+                  "type": "string"
+                },
+                "end_date": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "End date in YYYY-MM-DD format",
+                  "title": "End Date"
+                },
+                "start_time": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Start time in HH:MM 24h format, local to the requested coordinates; the timezone is inferred.",
+                  "title": "Start Time"
+                },
+                "end_time": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "End time in HH:MM 24h format, local to the requested coordinates; the timezone is inferred.",
+                  "title": "End Time"
+                },
+                "filter_type": {
+                  "description": "1=single hour, 2=range of hours, 3=single day, 4=range of days (week/month, <=1 month)",
+                  "enum": [
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "title": "Filter Type",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "start_date",
+                "filter_type"
+              ],
+              "title": "SegmentationDateTimeRange",
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "latitude": {
+          "description": "Latitude in decimal degrees (-90 to 90)",
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "description": "Longitude in decimal degrees (-180 to 180)",
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Longitude",
+          "type": "number"
+        },
+        "vertical_angle": {
+          "description": "Street View heading in degrees; the back view, when requested, uses heading + 180°. No input range is enforced.",
+          "title": "Vertical Angle",
+          "type": "number"
+        },
+        "horizontal_angle": {
+          "description": "Street View pitch control, 0-360; Engine divides this value by 100 before sending pitch in degrees (e.g. 100 gives 1°).",
+          "maximum": 360,
+          "minimum": 0,
+          "title": "Horizontal Angle",
+          "type": "number"
+        },
+        "back_view": {
+          "description": "Also request an image facing 180° opposite the supplied heading.",
+          "title": "Back View",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude",
+        "vertical_angle",
+        "horizontal_angle",
+        "back_view"
+      ],
+      "type": "object",
+      "title": "StreetViewSegmentationInput"
+    }
+  },
+  {
+    "name": "temperature_routing",
+    "description": "Submit temperature-aware route generation between two coordinate locations at a departure time. Returns status=processing and an activity_id immediately; use temperature_routing_read to retrieve the activity's processing, completed, or failed result. The current graph is built from a driving-road network; travel mode cannot be selected. Routing supports the contiguous United States only. Route and temperature-source availability varies by location and departure time; no universal historical start date is promised. Paid: 3,500 credits on all entitled plans. Show the user the exact parameters and expected credit cost, and ask for confirmation before submission. FortyGuard currently provides data only for supported regions within the United States. Requests outside supported U.S. coverage are not allowed. Availability within the United States also depends on the tool, location, date, and underlying data coverage.",
+    "input_schema": {
+      "properties": {
+        "origin": {
+          "additionalProperties": false,
+          "description": "Route endpoint coordinates in decimal latitude and longitude.",
+          "properties": {
+            "lat": {
+              "maximum": 90,
+              "minimum": -90,
+              "title": "Lat",
+              "type": "number"
+            },
+            "lon": {
+              "maximum": 180,
+              "minimum": -180,
+              "title": "Lon",
+              "type": "number"
+            }
+          },
+          "required": [
+            "lat",
+            "lon"
+          ],
+          "title": "RoutingCoordinates",
+          "type": "object"
+        },
+        "destination": {
+          "additionalProperties": false,
+          "description": "Route endpoint coordinates in decimal latitude and longitude.",
+          "properties": {
+            "lat": {
+              "maximum": 90,
+              "minimum": -90,
+              "title": "Lat",
+              "type": "number"
+            },
+            "lon": {
+              "maximum": 180,
+              "minimum": -180,
+              "title": "Lon",
+              "type": "number"
+            }
+          },
+          "required": [
+            "lat",
+            "lon"
+          ],
+          "title": "RoutingCoordinates",
+          "type": "object"
+        },
+        "departure_time": {
+          "description": "ISO-8601 departure date-time. Include Z or an offset for an absolute instant (e.g. 2026-08-23T13:00:00Z); without an offset, Engine treats it as local wall time using the route tile's UTC offset, which may be approximate near DST.",
+          "minLength": 1,
+          "title": "Departure Time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "origin",
+        "destination",
+        "departure_time"
+      ],
+      "type": "object",
+      "additionalProperties": false,
+      "title": "TemperatureRoutingInput"
+    }
+  },
+  {
+    "name": "temperature_routing_read",
+    "description": "Read an existing temperature-aware routing activity without generating routes again.",
+    "input_schema": {
+      "properties": {
+        "activity_id": {
+          "minLength": 1,
+          "pattern": "^\\S+$",
+          "title": "Activity Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "activity_id"
+      ],
+      "type": "object",
+      "additionalProperties": false,
+      "title": "TemperatureRoutingReadInput"
+    }
+  }
+]

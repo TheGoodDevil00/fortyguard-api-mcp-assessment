@@ -1,0 +1,7 @@
+{
+  "rest_available": true,
+  "mcp_available": true,
+  "auth_header_distinction": "REST requires 'api-key: <KEY>'; MCP requires 'Authorization: Bearer <KEY>'",
+  "workflow_alignment": "Both interfaces support synchronous point metrics and asynchronous long-running task polling (REST via GET /v1/status/{id}, MCP via *_read tools)",
+  "tool_count_difference": "Documentation lists 9 MCP tools; live server exposes 11 tools (added credit_balance and monitoring)"
+}
