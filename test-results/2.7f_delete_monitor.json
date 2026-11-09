@@ -1,0 +1,9 @@
+{
+  "error": false,
+  "status_code": 200,
+  "message": "Monitor deleted successfully",
+  "data": {
+    "monitor_id": "057aa0a6-b685-494e-b4ca-8808a6a92424",
+    "deleted": true
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "error": false,
+  "status_code": 200,
+  "message": "Environment Parameters Analysis Submitted Successfully",
+  "data": {
+    "activity_id": "976268c9-5d00-4dff-8e3a-14bf5be96cb6"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "activity_id": "2aeba855-c7da-4fab-a0ec-5d8b35eb04f1",
+  "status": "Completed",
+  "result": {
+    "metadata": {
+      "timezone": "America/New_York",
+      "timezone_offset_hours": -4,
+      "time_range": {
+        "start": "2024-07-15T14:00:00-04:00",
+        "end": "2024-07-15T14:00:00-04:00",
+        "interval": "1h",
+        "count": 1
+      },
+      "timestamps": [
+        "2024-07-15T14:00:00-04:00"
+      ]
+    },
+    "locations": [
+      {
+        "lat": 40.7128,
+        "lon": -74.006,
+        "elevation": 32.0,
+        "temperature": 32.5,
+        "parameters": {
+          "heat_index_celsius": [
+            36.2
+          ],
+          "apparent_temperature_celsius": [
+            37.9
+          ],
+          "relative_humidity_percent": [
+            53.4
+          ],
+          "precipitation_mm": [
+            0.0
+          ],
+          "cloud_cover_octas": [
+            8
+          ],
+          "wet_bulb_temperature_celsius": [
+            25.9
+          ],
+          "air_quality:idx": [
+            87.3
+          ],
+          "air_quality_pm2p5:idx": [
+            78.1
+          ],
+          "air_quality_pm10:idx": [
+            31.1
+          ],
+          "air_quality_no2:idx": [
+            4.1
+          ],
+          "aqi_us_co": [
+            2.9
+          ],
+          "air_quality_o3:idx": [
+            87.3
+          ],
+          "air_quality_so2:idx": [
+            5.5
+          ],
+          "methane_ppb": [
+            null
+          ],
+          "co2_ppm": [
+            null
+          ]
+        },
+        "solar_irradiance": {
+          "clear_sky": {
+            "ghi": 898.69,
+            "dni": 827.19,
+            "dhi": 136.76
+          },
+          "description": "These modeled clear-sky irradiance estimates in W/m² describe the specific location at 2024-07-15 14:00. GHI is global horizontal irradiance, DNI is direct normal irradiance, and DHI is diffuse horizontal irradiance."
+        }
+      }
+    ]
+  }
+}

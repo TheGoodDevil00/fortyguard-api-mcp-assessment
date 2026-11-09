@@ -1,0 +1,9 @@
+{
+  "error": false,
+  "status_code": 200,
+  "message": "Monitor alerts fetched successfully",
+  "data": {
+    "items": [],
+    "next_cursor": null
+  }
+}

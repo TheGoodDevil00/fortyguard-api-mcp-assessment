@@ -1,0 +1,10 @@
+{
+  "status": 401,
+  "body": {
+    "error": true,
+    "status_code": 401,
+    "details": {
+      "message": "Invalid or unknown API key."
+    }
+  }
+}
