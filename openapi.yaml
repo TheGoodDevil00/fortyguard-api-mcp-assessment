@@ -15,8 +15,6 @@ info:
 servers:
   - url: https://api.fortyguard.com/v1
     description: Primary REST API Gateway
-  - url: https://tos-mcp.app.fortyguard.com/mcp
-    description: Remote MCP Streamable HTTP (SSE) Server
 
 tags:
   - name: atmospheric
@@ -59,10 +57,11 @@ security:
 paths:
   /env_params:
     query:
-      summary: Query point environmental metrics (Idempotent Query)
+      summary: Query point environmental metrics (Proposed OAS 3.2.0 Idempotent Query)
       description: |
-        OpenAPI 3.2.0 native `QUERY` operation for calculating point-level atmospheric, comfort,
+        OpenAPI 3.2.0 native `QUERY` operation recommendation for calculating point-level atmospheric, comfort,
         and solar irradiance parameters in an idempotent manner with a request body.
+        (Note: Live production gateway currently implements this via POST /env_params).
       operationId: queryEnvParams
       tags: [atmospheric]
       security:
@@ -433,6 +432,9 @@ paths:
                 $ref: '#/components/schemas/CreditUsageResponse'
 
   /mcp:
+    servers:
+      - url: https://tos-mcp.app.fortyguard.com
+        description: Remote MCP Streamable HTTP (SSE) Server
     post:
       summary: Execute MCP tool invocation (JSON-RPC 2.0)
       description: Executes one of the 11 discovered tools over Streamable HTTP.
