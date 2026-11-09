@@ -8,17 +8,27 @@ import os
 import sys
 
 def get_api_key():
-    key = os.getenv("FORTYGUARD_API_KEY")
+    key = os.getenv("FORTYGUARD_API_KEY") or os.getenv("API_KEY")
     if not key:
         env_file = Path(__file__).resolve().parent.parent / ".env"
         if env_file.exists():
             for line in env_file.read_text(encoding="utf-8").splitlines():
                 line = line.strip()
-                if line.startswith("FORTYGUARD_API_KEY="):
-                    key = line.split("=", 1)[1].strip().strip('"').strip("'")
-                    break
+                if not line or line.startswith("#"):
+                    continue
+                if "api-key" in line.lower() or "api_key" in line.lower():
+                    parts = line.split(":", 1) if ":" in line else line.split("=", 1)
+                    if len(parts) == 2:
+                        key = parts[1].strip().strip('"').strip("'")
+                        break
+            if not key:
+                content = env_file.read_text(encoding="utf-8").strip()
+                if not any(c in content for c in ("\n", " ")):
+                    key = content.replace("api-key:", "").replace("api_key=", "").strip()
     if not key:
         print("Error: FORTYGUARD_API_KEY not found in environment or .env file.")
+        print("To verify existing MCP tool execution traces offline, run:")
+        print("  pytest tests/test_validation_suite.py")
         sys.exit(1)
     return key
 
