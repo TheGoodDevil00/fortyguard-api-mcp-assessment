@@ -1,6 +1,6 @@
 {
   "content": [
-    "{\"ok\":true,\"result\":{\"tool\":\"credit_balance\",\"value\":{\"available_credits\":907160},\"evidence\":[],\"warnings\":[]},\"trace\":{\"trace_id\":\"9ef23b4f0fc6\",\"tool\":\"credit_balance\",\"plan_type\":\"premium\",\"decision\":\"allow\",\"status\":\"ok\",\"latency_ms\":440,\"cost_credits\":0}}"
+    "{\"ok\":true,\"result\":{\"tool\":\"credit_balance\",\"value\":{\"available_credits\":892660},\"evidence\":[],\"warnings\":[]},\"trace\":{\"trace_id\":\"81257c613d00\",\"tool\":\"credit_balance\",\"plan_type\":\"premium\",\"decision\":\"allow\",\"status\":\"ok\",\"latency_ms\":478,\"cost_credits\":0}}"
   ],
   "is_error": false
 }

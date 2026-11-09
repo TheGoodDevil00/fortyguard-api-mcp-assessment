@@ -3,7 +3,7 @@
   "status_code": 200,
   "message": "Monitor deleted successfully",
   "data": {
-    "monitor_id": "057aa0a6-b685-494e-b4ca-8808a6a92424",
+    "monitor_id": "e92a978a-c451-4f59-95b8-61a32f3fcffd",
     "deleted": true
   }
 }

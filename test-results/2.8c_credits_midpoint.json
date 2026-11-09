@@ -17,18 +17,18 @@
   },
   "credit_summary": {
     "total_available_credits": 1000000,
-    "cycle_credits_used": 89340,
-    "cycle_remaining_credits": 910660,
-    "cycle_usage_percentage": 8.9,
-    "total_credits_used": 92840,
-    "total_remaining_credits": 907160
+    "cycle_credits_used": 103840,
+    "cycle_remaining_credits": 896160,
+    "cycle_usage_percentage": 10.4,
+    "total_credits_used": 107340,
+    "total_remaining_credits": 892660
   },
   "activity_breakdown": [
     {
       "name": "Environment Parameter Analysis",
-      "credits": 49300,
-      "count": 17,
-      "percentage": 4.93
+      "credits": 63800,
+      "count": 22,
+      "percentage": 6.38
     },
     {
       "name": "Tile Satellite Segmentation",
@@ -56,12 +56,12 @@
     },
     {
       "name": "Unused Credits",
-      "credits": 910660,
+      "credits": 896160,
       "count": 0,
-      "percentage": 91.07
+      "percentage": 89.62
     }
   ],
-  "total_credits_used": 89340,
+  "total_credits_used": 103840,
   "billing_cycle": {
     "start_date": "2026-11-09T07:44:00.445385+00:00",
     "end_date": "2026-12-09T07:44:00.445385+00:00",

@@ -3,7 +3,7 @@
   "status_code": 200,
   "message": "Monitor fetched successfully",
   "data": {
-    "monitor_id": "057aa0a6-b685-494e-b4ca-8808a6a92424",
+    "monitor_id": "e92a978a-c451-4f59-95b8-61a32f3fcffd",
     "heatmap_id": "808b4443-e39e-4b8f-b231-e530c5a0c907",
     "heatmap_source": "enterprise",
     "account_id": "acc#r5hwagkQAX",
@@ -55,12 +55,12 @@
         "threshold": 38.0,
         "lower_bound": null,
         "upper_bound": null,
-        "rule_id": "c003fa3e-8cd6-4015-80d7-28f98ecca3e1"
+        "rule_id": "e70e2cc6-ce63-49b5-ad66-fef565bd9e25"
       }
     ],
     "notifications": {
       "email": [
-        "hitesh.200711@gmail.com"
+        "dev-test@example.com"
       ],
       "sms": [],
       "whatsapp": []
@@ -71,7 +71,7 @@
     "next_run_at": null,
     "active_run_id": null,
     "alert_count": 0,
-    "created_at": "2026-11-09T10:06:59.210951Z",
-    "updated_at": "2026-11-09T10:06:59.210951Z"
+    "created_at": "2026-11-09T12:32:06.442504Z",
+    "updated_at": "2026-11-09T12:32:06.442504Z"
   }
 }
