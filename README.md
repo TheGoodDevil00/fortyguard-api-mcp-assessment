@@ -89,14 +89,17 @@ flowchart TD
 ## Repository Structure
 
 ```
+├── .github/workflows/verify.yml        # Automated CI pipeline running pytest & harness
+├── tests/
+│   └── test_validation_suite.py       # Pytest test suite asserting all 30 test fixtures
 ├── README.md                           # This executive technical summary & architecture
 ├── fortyguard_evaluation_report.md     # Full comprehensive technical evaluation report
-├── requirements.txt                    # Python runtime dependencies (requests, mcp)
+├── requirements.txt                    # Python runtime dependencies (requests, mcp, pytest)
 ├── .env.example                        # Template for configuring API credentials
 ├── .gitignore                          # Standard gitignore (protecting secrets and caches)
 │
 └── test-results/                       # Test suite outputs and forensic evidence
-    ├── harness.py                      # Master automated test harness (Phases 1-5)
+    ├── harness.py                      # Master automated test harness (--verify & --live)
     ├── mcp_runner.py                   # Standalone Streamable HTTP MCP runner
     ├── heat_intelligence_report.pdf    # Validated 774 KB report downloaded from S3
     ├── test_log.jsonl                  # Timestamped structured test execution logs
@@ -133,28 +136,36 @@ flowchart TD
 
 ---
 
-## How to Reproduce the Automated Tests
+## How to Verify & Run the Automated Tests
 
-### 1. Prerequisites
-- Python 3.10+
-- FortyGuard API key configured in `.env`:
-  ```bash
-  cp .env.example .env
-  # Add your FortyGuard API key: FORTYGUARD_API_KEY=your_key_here
-  ```
-
-### 2. Installation
+### 1. Installation
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Run the Test Harness
+### 2. Instant Offline Verification (No Credentials or Credits Needed)
+Reviewers can immediately verify the integrity of all 30 test executions, schemas, and contract assertions offline:
 ```bash
-# Execute master REST & MCP validation suite
-python test-results/harness.py
+# Run via pytest (22 test suites, 0.05s execution):
+python -m pytest -v tests/test_validation_suite.py
 
-# Execute isolated MCP agent runner over Streamable HTTP
-python test-results/mcp_runner.py
+# Or run via harness offline verification mode:
+python test-results/harness.py --verify
 ```
 
+### 3. Live Execution (Against FortyGuard Endpoints)
+To run live end-to-end tests against FortyGuard production APIs and the MCP server:
+```bash
+# Option A: Set environment variable
+export FORTYGUARD_API_KEY="your_api_key_here"
+python test-results/harness.py --live
+
+# Option B: Create local .env file
+cp .env.example .env
+# Edit .env and insert FORTYGUARD_API_KEY
+python test-results/harness.py --live
+
+# Execute isolated MCP agent runner over Streamable HTTP:
+python test-results/mcp_runner.py
+```
 All responses, latencies, and credit consumption metrics will be output to `test-results/`.

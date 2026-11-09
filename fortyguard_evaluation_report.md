@@ -143,6 +143,26 @@ Overall, the Temperature API® and MCP represent high-caliber, forward-looking c
 
 ---
 
+## Full-Stack Correlation: Dashboard UI State Management vs API Polling Lifecycle
+
+By evaluating the web Dashboard alongside the programmatic REST API and MCP server, several critical full-stack architectural insights emerged:
+
+1. **Activity Queue State Loss on Browser Refresh**:
+   - *Observed Behavior*: Submitting an asynchronous request (such as a Heat Intelligence Report or Heatmap) initiates a task queue lifecycle. Refreshing the browser while waiting drops progress tracking from the UI activity queue entirely. However, backend processing continues, and completion notifications arrive after the fact.
+   - *Architectural Root Cause*: The frontend client retains the active `activity_id` in transient component state rather than persisting it in `localStorage` or synchronizing it with a user session store.
+   - *Proposed Solution*: Persist pending `activity_id`s in local storage upon submission and implement an automatic re-hydration hook that calls `GET /v1/status/{activity_id}` on mount until the task transitions to `Completed` or `Failed`.
+
+2. **Frontend Optimistic Credit Deductions vs Backend Transactional Billing**:
+   - *Observed Behavior*: During dashboard testing of demo heatmaps (e.g. California demo), multiple failed attempts triggered immediate credit deduction indicators on the frontend, even after the generation failed.
+   - *Architectural Root Cause*: The UI optimistically decrements credit balances upon request dispatch. In contrast, our programmatic API testing confirmed that FortyGuard's backend strictly enforces zero-credit billing for rejected or failed jobs.
+   - *Proposed Solution*: Defer frontend credit balance decrementing until the backend returns a confirmed 200 OK with `status: completed`, or reconcile the balance against `POST /v1/system/fetch-api-key-usage`.
+
+3. **Indeterminate Polling Feedback vs Server-Sent Events (SSE)**:
+   - *Observed Behavior*: Compute-heavy heatmap jobs can span several minutes. The dashboard's activity queue provides indeterminate progress spinners, which appeared stalled after waiting 15+ minutes.
+   - *Proposed Solution*: Rather than opaque client polling loops, adopt Server-Sent Events (SSE) or WebSockets—leveraging the same streaming transport pattern FortyGuard already uses for its MCP server—to stream granular stages (`Ingesting Imagery` -> `Neural LTM Inference` -> `Raster Tiling`).
+
+---
+
 ## API Documentation Quality & Inconsistencies
 
 1. **Polygon AOI Representation**:
