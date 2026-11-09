@@ -58,7 +58,7 @@ flowchart TD
 
 ### 2. Temperature Unit Hazard
 - **Current State**: `POST /v1/env_params` and `POST /v1/heatmap` strictly operate in **Celsius**. `POST /v1/heat_intelligence` requires input temperature in **Fahrenheit**.
-- **Proposed Solution**: Introduce an optional `"unit": "celsius" | "fahrenheit"` field across all endpoints with default fallback to Celsius, or document explicit unit schemas in OpenAPI 3.1.
+- **Proposed Solution**: Introduce an optional `"unit": "celsius" | "fahrenheit"` field across all endpoints with default fallback to Celsius, or document explicit unit schemas in OpenAPI 3.2.0.
 
 ### 3. GeoJSON Wrapper Schema Discrepancy
 - **Current State**: Documentation snippets in `create-heatmap.md` and `create-monitor.md` present bare `Polygon` geometries (`{"type": "Polygon", "coordinates": [...]}`). The backend strictly requires a GeoJSON `FeatureCollection` wrapper, rejecting bare polygons with `HTTP 422: "boundary_geojson must be a GeoJSON FeatureCollection."`
@@ -71,6 +71,10 @@ flowchart TD
 ### 5. Input Validation Error Boundaries
 - **Current State**: Submitting non-ISO date formats (`07/15/2024`) returns an unhandled `HTTP 500 Internal Server Error`.
 - **Proposed Solution**: Catch date parsing errors at the request schema validation layer (Pydantic / Joi) and return `HTTP 400 Bad Request` with an informative error message: `"Invalid date format. Expected YYYY-MM-DD or ISO 8601 string."`
+
+### 6. OpenAPI 3.2.0 Specification Adoption
+- **Current State**: API documentation is currently static Markdown without a machine-readable schema.
+- **Proposed Solution**: Author and publish an **OpenAPI 3.2.0** contract. OAS 3.2.0 natively models Server-Sent Events (`text/event-stream` with `itemSchema`) for FortyGuard's Streamable HTTP MCP server, formalizes point calculations as idempotent `QUERY` operations, and structures multi-domain APIs via nested multipurpose tags (`kind: nav`).
 
 ---
 

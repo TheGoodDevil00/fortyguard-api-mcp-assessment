@@ -178,6 +178,12 @@ By evaluating the web Dashboard alongside the programmatic REST API and MCP serv
    - Offline docs document 9 MCP tools, but the live server exposes 11 tools (`credit_balance` and `monitoring` are unmentioned).
 5. **Input Validation Error Codes**:
    - Formatting an invalid date (`07/15/2024`) returns `HTTP 500 Internal Server Error` instead of a structured `HTTP 400 Bad Request` validation envelope.
+6. **Lack of Machine-Readable Contract (OpenAPI 3.2.0 Opportunity)**:
+   - Documentation is currently presented solely as static Markdown pages without a machine-readable schema definition (`openapi.yaml`).
+   - Adopting the newly ratified **OpenAPI 3.2.0** specification provides transformative benefits uniquely aligned with FortyGuard's multi-modal architecture:
+     - **Native Server-Sent Events (SSE)**: OAS 3.2.0 introduces native support for `text/event-stream` alongside the `itemSchema` keyword, enabling formal contract definitions for FortyGuard's Streamable HTTP MCP server and asynchronous task streaming.
+     - **First-Class `QUERY` HTTP Method**: Allows formalizing idempotent environmental parameter queries (`POST /v1/env_params`) with complex request bodies as `QUERY` operations rather than state-mutating `POST` requests.
+     - **Multipurpose Nested Tags (`kind: nav`)**: Enables hierarchical documentation structures in portals like Swagger UI (which recently shipped OAS 3.2.0 support), separating Microclimate Physics, Spatial Heatmaps, Vision Segmentation, Routing, and MCP Agent Bridges cleanly, with an OAS 3.1 build for legacy client SDK generators.
 
 ---
 
@@ -196,6 +202,7 @@ By evaluating the web Dashboard alongside the programmatic REST API and MCP serv
 2. **Standardize on Celsius**: Convert `POST /v1/heat_intelligence` to accept Celsius (or provide an explicit `"unit": "celsius" | "fahrenheit"` parameter across all endpoints).
 3. **Graceful Input Validation**: Sanitize date format errors to return `HTTP 400` with helpful validation hints rather than unhandled `HTTP 500`.
 4. **Introduce Webhook Notifications**: For heatmaps and reports taking 1–3 minutes, webhooks or callback URLs would eliminate client polling loops.
+5. **Publish OpenAPI 3.2.0 Specification with Dual 3.1 Compatibility**: Author and publish a formal OpenAPI 3.2.0 contract to natively document SSE streaming endpoints, MCP transport models, and idempotent `QUERY` methods, while maintaining an OAS 3.1 build for legacy client SDK generators.
 
 ---
 
