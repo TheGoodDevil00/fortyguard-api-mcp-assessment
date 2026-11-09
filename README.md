@@ -82,6 +82,9 @@ flowchart TD
 
 ```
 ├── .github/workflows/verify.yml        # Automated CI pipeline running pytest & harness
+├── scripts/                            # Master test harnesses and runner scripts
+│   ├── harness.py                      # Master automated test harness (--verify & --live)
+│   └── mcp_runner.py                   # Standalone Streamable HTTP MCP runner
 ├── tests/
 │   └── test_validation_suite.py       # Pytest test suite asserting all 30 test fixtures
 ├── README.md                           # This executive technical summary & architecture
@@ -91,8 +94,6 @@ flowchart TD
 ├── .gitignore                          # Standard gitignore (protecting secrets and caches)
 │
 └── test-results/                       # Test suite outputs and forensic evidence
-    ├── harness.py                      # Master automated test harness (--verify & --live)
-    ├── mcp_runner.py                   # Standalone Streamable HTTP MCP runner
     ├── heat_intelligence_report.pdf    # Validated 774 KB report downloaded from S3
     ├── test_log.jsonl                  # Timestamped structured test execution logs
     ├── test_summary.json               # Aggregated test execution metrics & pass rate
@@ -142,7 +143,7 @@ Reviewers can immediately verify the integrity of all 30 test executions, schema
 python -m pytest -v tests/test_validation_suite.py
 
 # Or run via harness offline verification mode:
-python test-results/harness.py --verify
+python scripts/harness.py --verify
 ```
 
 ### 3. Live Execution (Against FortyGuard Endpoints)
@@ -153,14 +154,14 @@ To run live end-to-end tests against FortyGuard production APIs and the MCP serv
 ```bash
 # Option A: Set environment variable
 export FORTYGUARD_API_KEY="your_api_key_here"
-python test-results/harness.py --live
+python scripts/harness.py --live
 
 # Option B: Create local .env file
 cp .env.example .env
 # Edit .env and insert FORTYGUARD_API_KEY
-python test-results/harness.py --live
+python scripts/harness.py --live
 
 # Execute isolated MCP agent runner over Streamable HTTP:
-python test-results/mcp_runner.py
+python scripts/mcp_runner.py
 ```
 All responses, latencies, and credit consumption metrics will be output to `test-results/`.

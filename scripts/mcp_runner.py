@@ -35,7 +35,7 @@ def get_api_key():
 MCP_URL = "https://tos-mcp.app.fortyguard.com/mcp"
 API_KEY = get_api_key()
 HEADERS = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
-RESULTS_DIR = Path(__file__).resolve().parent
+RESULTS_DIR = Path(__file__).resolve().parent.parent / "test-results"
 
 async def test_tools():
     # 1. credit_balance

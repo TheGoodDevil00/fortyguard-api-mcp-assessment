@@ -216,4 +216,4 @@ By evaluating the web Dashboard alongside the programmatic REST API and MCP serv
 - **Budget Compliance**: Spent only 11.02% of total credits, remaining well below the 200,000 credit ceiling (88.98% safety reserve retained).
 
 ---
-*Report generated autonomously by test harness at `test-results/harness.py`.*
+*Report generated autonomously by test harness at `scripts/harness.py`.*

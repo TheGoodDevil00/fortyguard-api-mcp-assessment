@@ -30,4 +30,4 @@ jobs:
 
       - name: Run Autonomous Harness Offline Verification
         run: |
-          python test-results/harness.py --verify
+          python scripts/harness.py --verify

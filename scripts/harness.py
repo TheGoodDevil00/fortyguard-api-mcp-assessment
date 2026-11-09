@@ -1090,7 +1090,7 @@ def main():
         print("Please set FORTYGUARD_API_KEY in your environment or configure a .env file:")
         print("  export FORTYGUARD_API_KEY='your_key_here'")
         print("Or run offline verification with:")
-        print("  python harness.py --verify")
+        print("  python scripts/harness.py --verify")
         sys.exit(1)
 
     try:
