@@ -1,0 +1,28 @@
+{
+  "status": 422,
+  "body": {
+    "error": true,
+    "status_code": 422,
+    "message": "Field 'temperature' is required.",
+    "field": "temperature",
+    "detail": [
+      {
+        "type": "missing",
+        "loc": [
+          "body",
+          "temperature"
+        ],
+        "msg": "Field required",
+        "input": {
+          "latitude": 40.7128,
+          "longitude": -74.006,
+          "date_time": {
+            "start_date": "2024-07-15",
+            "start_time": "14:00",
+            "filter_type": 1
+          }
+        }
+      }
+    ]
+  }
+}

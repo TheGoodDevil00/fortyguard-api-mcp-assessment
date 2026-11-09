@@ -1,0 +1,10 @@
+{
+  "status": 400,
+  "body": {
+    "error": true,
+    "status_code": 400,
+    "message": "FortyGuard currently provides data only for supported regions within the United States. The requested location is outside supported U.S. coverage. Availability within the United States also depends on the tool, location, date, and data source.",
+    "field": "latitude",
+    "code": "OUT_OF_COVERAGE"
+  }
+}

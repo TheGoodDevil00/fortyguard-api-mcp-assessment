@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-11-09T11:54:24.995332+00:00",
+  "total_tests": 30,
+  "passed": 30,
+  "failed": 0,
+  "pass_rate_pct": 100.0,
+  "credit_allocation": 1000000,
+  "credits_consumed": 95740,
+  "credits_remaining": 904260
+}

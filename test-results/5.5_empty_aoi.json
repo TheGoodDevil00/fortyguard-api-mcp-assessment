@@ -1,0 +1,9 @@
+{
+  "status": 400,
+  "body": {
+    "error": true,
+    "status_code": 400,
+    "message": "Provide exactly one valid Polygon feature.",
+    "field": "polygon_aoi"
+  }
+}
