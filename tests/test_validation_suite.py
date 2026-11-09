@@ -28,6 +28,7 @@ def test_phase_1_credit_baseline():
     assert data["api_key_details"]["status"] == "active"
     assert data["api_key_details"]["valid"] is True
     assert data["credit_summary"]["total_available_credits"] == 1_000_000
+    assert data["credit_summary"]["total_remaining_credits"] == 898_460
 
 
 def test_phase_1_valid_auth_header():
@@ -126,6 +127,14 @@ def test_phase_2_monitors_crud_lifecycle():
     assert deleted.get("status") in (200, "success") or "data" in deleted or "message" in deleted
 
 
+def test_phase_2_status_polling_and_midpoint_credits():
+    """Verify asynchronous task status query and midpoint credit tracking."""
+    midpoint = load_fixture("2.8c_credits_midpoint.json")
+    assert "credit_summary" in midpoint
+    assert midpoint["credit_summary"]["total_remaining_credits"] == 892_660
+    assert midpoint["credit_summary"]["total_available_credits"] == 1_000_000
+
+
 # ─────────────────────────────────────────────────────────────
 # Phase 3: Model Context Protocol (MCP) Server
 # ─────────────────────────────────────────────────────────────
@@ -204,9 +213,9 @@ def test_phase_5_missing_required_fields():
 
 
 def test_phase_5_routing_excessive_distance():
-    """Verify boundary halt on excessive routing distance."""
+    """Verify boundary halt on excessive routing distance (detecting FortyGuard's HTTP 500 error boundary)."""
     data = load_fixture("5.4_routing_excessive_distance.json")
-    assert data.get("status") in (200, 400, 422, 500)
+    assert data.get("status") == 500
 
 
 def test_phase_5_empty_aoi():
@@ -215,15 +224,27 @@ def test_phase_5_empty_aoi():
     assert data.get("status") == 400
 
 
+def test_phase_5_diagnostic_headers():
+    """Verify server response headers inspection."""
+    data = load_fixture("5.6_diagnostic_headers.json")
+    assert "server" in data
+    assert data.get("server") == "envoy"
+
+
 # ─────────────────────────────────────────────────────────────
 # Governance & Credit Accounting Audit
 # ─────────────────────────────────────────────────────────────
 
 def test_credit_ledger_audit():
-    """Verify credit consumption remained strictly under the 200,000 ceiling."""
+    """Verify credit consumption remained strictly under the 200,000 ceiling and matches single source of truth."""
     data = load_fixture("test_summary.json")
-    assert data["total_tests"] >= 30
-    assert data["pass_rate_pct"] >= 95.0
+    assert data["total_tests"] == 30
+    assert data["passed"] == 30
+    assert data["failed"] == 0
+    assert data["pass_rate_pct"] == 100.0
+    assert data["credit_allocation"] == 1_000_000
+    assert data["credits_consumed"] == 110_240
+    assert data["credits_remaining"] == 889_760
     assert data["credits_consumed"] < 200_000
 
 
